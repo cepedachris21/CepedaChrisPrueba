@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import uta.edu.ec.pruebacepeda.ui.theme.PruebaCepedaTheme
 
-// 1. Modelo de Datos
-data class Contact(
+// 1. Modelo de Datos en Español
+data class Contacto(
     val id: Long = System.currentTimeMillis(),
-    val name: String,
-    val email: String,
-    val phone: String,
-    val zip: String
+    val nombre: String,
+    val correo: String,
+    val telefono: String,
+    val codigoPostal: String
 )
 
 class MainActivity : ComponentActivity() {
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PruebaCepedaTheme {
-                AddressBookApp()
+                AppLibretaContactos()
             }
         }
     }
@@ -44,86 +44,111 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddressBookApp() {
-    // Estados para el formulario
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var zip by remember { mutableStateOf("") }
+fun AppLibretaContactos() {
+    // --- ESTADOS DEL FORMULARIO (En Español) ---
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var codigoPostal by remember { mutableStateOf("") }
     
-    // Lista de contactos y gestión de Snackbar
-    val contactList = remember { mutableStateListOf<Contact>() }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    // --- GESTIÓN DE LISTA Y SNACKBAR ---
+    val listaContactos = remember { mutableStateListOf<Contacto>() }
+    val estadoSnackbar = remember { SnackbarHostState() }
+    val alcanceCorrutina = rememberCoroutineScope()
     
-    // Recuperación de contactos eliminados
-    var recentlyDeletedContact by remember { mutableStateOf<Contact?>(null) }
-    var deletedContactIndex by remember { mutableStateOf(-1) }
+    // --- RESPALDO PARA "DESHACER" ---
+    var contactoEliminadoRecientemente by remember { mutableStateOf<Contacto?>(null) }
+    var indiceContactoEliminado by remember { mutableStateOf(-1) }
 
-    // LÓGICA DE VALIDACIÓN (Fase 1.1)
-    val isNameValid = name.trim().isNotEmpty()
-    val isEmailValid = email.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val isPhoneValid = phone.length == 10
-    val isZipValid = zip.length == 5
+    // --- LÓGICA DE VALIDACIÓN (FASE 1.1) ---
+    val esNombreValido = nombre.trim().isNotEmpty()
+
+    val esCorreoValido = correo.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(correo).matches()
+
+    val esTelefonoValido = telefono.length == 10
+
+    val esCodigoPostalValido = codigoPostal.length == 5
     
-    // El botón se habilita solo si TODO es válido
-    val canSave = isNameValid && isEmailValid && isPhoneValid && isZipValid
+
+    val puedeGuardar = esNombreValido && esCorreoValido && esTelefonoValido && esCodigoPostalValido
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(hostState = estadoSnackbar) },
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Address Book App") })
+            // CAMBIO EN VIVO: Cambiar el título de la barra superior aquí
+            CenterAlignedTopAppBar(title = { Text("Libreta de Contactos - Prueba") })
         }
-    ) { innerPadding ->
+    ) { rellenoInterno ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
+                .padding(rellenoInterno)
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
             Text(text = "Nuevo Contacto", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             
-            // --- CAMPOS DE TEXTO CON VALIDACIÓN VISUAL ---
+            // --- CAMPOS CON VALIDACIÓN Y SOPORTE VISUAL ---
             
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = nombre,
+                onValueChange = { nombre = it },
                 label = { Text("Nombre (Obligatorio)") },
                 modifier = Modifier.fillMaxWidth(),
-                isError = name.isNotEmpty() && !isNameValid,
+                isError = nombre.isNotEmpty() && !esNombreValido,
+                supportingText = {
+                    if (nombre.isNotEmpty() && !esNombreValido) {
+                        Text("Requerido", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 singleLine = true
             )
             
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email (Opcional)") },
+                value = correo,
+                onValueChange = { correo = it },
+                label = { Text("Correo (Opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                isError = email.isNotEmpty() && !isEmailValid,
+                isError = correo.isNotEmpty() && !esCorreoValido,
+                supportingText = {
+                    if (correo.isNotEmpty() && !esCorreoValido) {
+
+                        Text("Correo inválido", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 singleLine = true
             )
             
             OutlinedTextField(
-                value = phone,
-                // Solo permite números y máximo 10 caracteres
-                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() }) phone = it },
+                value = telefono,
+                //  Si cambiaste la longitud a 9 arriba, cámbiala también aquí (it.length <= 9)
+                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() }) telefono = it },
                 label = { Text("Teléfono (10 dígitos)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = phone.isNotEmpty() && !isPhoneValid,
+                isError = telefono.isNotEmpty() && !esTelefonoValido,
+                supportingText = {
+                    if (telefono.isNotEmpty() && !esTelefonoValido) {
+                        // Mostrar cuántos dígitos lleva el usuario
+                        Text("Faltan dígitos (${telefono.length}/10)", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 singleLine = true
             )
             
             OutlinedTextField(
-                value = zip,
-                // Solo permite números y máximo 5 caracteres
-                onValueChange = { if (it.length <= 5 && it.all { c -> c.isDigit() }) zip = it },
-                label = { Text("ZIP (5 dígitos)") },
+                value = codigoPostal,
+                onValueChange = { if (it.length <= 5 && it.all { c -> c.isDigit() }) codigoPostal = it },
+                label = { Text("ZIP / Código Postal (5 dígitos)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = zip.isNotEmpty() && !isZipValid,
+                isError = codigoPostal.isNotEmpty() && !esCodigoPostalValido,
+                supportingText = {
+                    if (codigoPostal.isNotEmpty() && !esCodigoPostalValido) {
+                        Text("Deben ser 5 dígitos", color = MaterialTheme.colorScheme.error)
+                    }
+                },
                 singleLine = true
             )
             
@@ -131,14 +156,13 @@ fun AddressBookApp() {
             
             Button(
                 onClick = {
-                    if (canSave) {
-                        contactList.add(Contact(name = name, email = email, phone = phone, zip = zip))
-                        // Limpiar campos después de guardar
-                        name = ""; email = ""; phone = ""; zip = ""
+                    if (puedeGuardar) {
+                        listaContactos.add(Contacto(nombre = nombre, correo = correo, telefono = telefono, codigoPostal = codigoPostal))
+                        nombre = ""; correo = ""; telefono = ""; codigoPostal = "" // Limpiar campos
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = canSave
+                enabled = puedeGuardar
             ) {
                 Text("Guardar Contacto")
             }
@@ -149,7 +173,7 @@ fun AddressBookApp() {
             Text(text = "Lista de Contactos", style = MaterialTheme.typography.titleMedium)
             
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(contactList) { contact ->
+                items(listaContactos) { contacto ->
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -160,29 +184,31 @@ fun AddressBookApp() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = contact.name, style = MaterialTheme.typography.bodyLarge)
-                                Text(text = "Telf: ${contact.phone} | ZIP: ${contact.zip}", style = MaterialTheme.typography.bodySmall)
+                                Text(text = contacto.nombre, style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Telf: ${contacto.telefono} | ZIP: ${contacto.codigoPostal}", style = MaterialTheme.typography.bodySmall)
                             }
                             IconButton(onClick = {
-                                // Lógica de Eliminación (Fase 1.2)
-                                val index = contactList.indexOf(contact)
-                                recentlyDeletedContact = contact
-                                deletedContactIndex = index
-                                contactList.remove(contact)
+                                // --- LÓGICA DE ELIMINACIÓN (FASE 1.2) ---
+                                val indice = listaContactos.indexOf(contacto)
+                                contactoEliminadoRecientemente = contacto
+                                indiceContactoEliminado = indice
+                                listaContactos.remove(contacto)
 
-                                scope.launch {
-                                    val result = snackbarHostState.showSnackbar(
+                                alcanceCorrutina.launch {
+                                    val resultado = estadoSnackbar.showSnackbar(
                                         message = "Contacto eliminado",
                                         actionLabel = "DESHACER",
+                                        // CAMBIO EN VIVO: Duración (Short = 2s, Long = 4s)
                                         duration = SnackbarDuration.Short
                                     )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        // Recuperar si presiona DESHACER
-                                        contactList.add(deletedContactIndex, recentlyDeletedContact!!)
+                                    // Si presiona DESHACER, se restaura en su posición original
+                                    if (resultado == SnackbarResult.ActionPerformed) {
+                                        listaContactos.add(indiceContactoEliminado, contactoEliminadoRecientemente!!)
                                     }
                                 }
                             }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                                // CAMBIO EN VIVO: Cambiar color del icono de eliminar
+                                Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
                             }
                         }
                     }
