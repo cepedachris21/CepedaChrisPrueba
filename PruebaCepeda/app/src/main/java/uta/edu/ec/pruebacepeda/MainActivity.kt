@@ -198,7 +198,7 @@ fun AppLibretaContactos() {
                                     val resultado = estadoSnackbar.showSnackbar(
                                         message = "Contacto eliminado",
                                         actionLabel = "DESHACER",
-                                        // CAMBIO EN VIVO: Duración (Short = 2s, Long = 4s)
+                                        //  Duración (Short = 2s, Long = 4s)
                                         duration = SnackbarDuration.Short
                                     )
                                     // Si presiona DESHACER, se restaura en su posición original
@@ -207,7 +207,7 @@ fun AppLibretaContactos() {
                                     }
                                 }
                             }) {
-                                // CAMBIO EN VIVO: Cambiar color del icono de eliminar
+                                // Cambiar color del icono de eliminar
                                 Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
                             }
                         }
