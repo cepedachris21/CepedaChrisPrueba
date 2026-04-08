@@ -123,10 +123,10 @@ fun AppLibretaContactos() {
             OutlinedTextField(
                 value = telefono,
                 //  Si cambiaste la longitud a 9 arriba, cámbiala también aquí (it.length <= 9)
-                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() }) telefono = it },
+                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() } ) telefono = it },
                 label = { Text("Teléfono (10 dígitos)") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 isError = telefono.isNotEmpty() && !esTelefonoValido,
                 supportingText = {
                     if (telefono.isNotEmpty() && !esTelefonoValido) {
@@ -175,11 +175,15 @@ fun AppLibretaContactos() {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(listaContactos) { contacto ->
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
