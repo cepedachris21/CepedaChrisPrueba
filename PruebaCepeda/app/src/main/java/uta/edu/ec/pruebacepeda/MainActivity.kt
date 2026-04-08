@@ -123,7 +123,7 @@ fun AppLibretaContactos() {
             OutlinedTextField(
                 value = telefono,
                 //  Si cambiaste la longitud a 9 arriba, cámbiala también aquí (it.length <= 9)
-                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() } ) telefono = it },
+                onValueChange = { if (it.length <= 10 && it != ) telefono = it },
                 label = { Text("Teléfono (10 dígitos)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -131,7 +131,7 @@ fun AppLibretaContactos() {
                 supportingText = {
                     if (telefono.isNotEmpty() && !esTelefonoValido) {
                         // Mostrar cuántos dígitos lleva el usuario
-                        Text("Faltan dígitos (${telefono.length}/10)", color = MaterialTheme.colorScheme.error)
+                        Text("Faltan dígitos", color = MaterialTheme.colorScheme.error)
                     }
                 },
                 singleLine = true
