@@ -11,7 +11,7 @@ Button(
                 Text("Guardar Contacto")
             }
 
-Primero instanciamos en Button
+Primero instanciamos el Button
 
 Luego llamamos al método onClick
 
