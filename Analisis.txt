@@ -1,0 +1,27 @@
+Button(
+                onClick = {
+                    if (puedeGuardar) {
+                        listaContactos.add(Contacto(nombre = nombre, correo = correo, telefono = telefono, codigoPostal = codigoPostal))
+                        nombre = ""; correo = ""; telefono = ""; codigoPostal = "" // Limpiar campos
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = puedeGuardar
+            ) {
+                Text("Guardar Contacto")
+            }
+
+Primero instanciamos en Button
+
+Luego llamamos al método onClick
+
+Usamos un validador if, el que evalúa si la variable puedeGuardar es verdadera, si es asi agrega el contacto a la lista con 
+
+listaContactos.add y le pasas como parámetros valor del nombre, correo, teléfono y codigoPostal
+
+Después de esto limpia los campos con nombre = ""
+
+Luego usa modifier para que se llene al ancho máximo
+
+por ultimo le da el valor de puedeGuardar a la variable enable
+
